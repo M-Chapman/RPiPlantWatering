@@ -2,4 +2,4 @@ bin/
 lib/
 pyvenv.cfg
 share/
-pin*
+csvfiles/
