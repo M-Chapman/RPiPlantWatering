@@ -5,7 +5,7 @@ import datetime
 import time
 import csv
 import os
-import pandas as pd
+import numpy as np
 
 
 GPIO.setmode(GPIO.BOARD)  # Broadcom pin-numbering scheme
@@ -57,7 +57,7 @@ if __name__ == "__main__":
                 if get_value(i) > 2:
                     create_table(i)
 
-            df = pd.DataFrame(pin0.csv)
+            #df = pd.DataFrame(pin0.csv)
             
             rename_file("pin0", "pins")
 
