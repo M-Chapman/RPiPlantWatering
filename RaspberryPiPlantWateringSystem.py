@@ -6,6 +6,7 @@ import time
 import csv
 import os
 import numpy as np
+import pandas as pd
 
 
 GPIO.setmode(GPIO.BOARD)  # Broadcom pin-numbering scheme
@@ -38,7 +39,7 @@ def create_table(pin):
     #CSV file creation
     fields = ['Pin', 'Time', 'Moisture']
     rows = [[pin, datetime.datetime.now().replace(microsecond = 0), get_value(pin)]]
-    filename = "Documents/RPiPlantWatering/pin{}.csv".format(pin)
+    filename = "pin{}.csv".format(pin)
 
     with open(filename, 'w') as csvfile:
         csvwriter = csv.writer(csvfile)
@@ -46,7 +47,7 @@ def create_table(pin):
         csvwriter.writerows(rows) 
 
 def rename_file(current_name, new_name):
-    os.rename("Documents/RPiPlantWatering/{}.csv".format(current_name), "Documents/RPiPlantWatering/{}.csv".format(new_name))
+    os.rename("{}.csv".format(current_name), "{}.csv".format(new_name))
 
 if __name__ == "__main__":
     try:
@@ -57,10 +58,12 @@ if __name__ == "__main__":
                 if get_value(i) > 2:
                     create_table(i)
 
-            #df = pd.DataFrame(pin0.csv)
+            df = pd.read_csv("pin0.csv")
             
             rename_file("pin0", "pins")
 
+            print(df)
+            
             time.sleep(500)
 
     except KeyboardInterrupt:
