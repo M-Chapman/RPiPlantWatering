@@ -39,32 +39,49 @@ def create_table(pin):
     #CSV file creation
     fields = ['Pin', 'Time', 'Moisture']
     rows = [[pin, datetime.datetime.now().replace(microsecond = 0), get_value(pin)]]
-    filename = "pin{}.csv".format(pin)
+    filename = "csvfiles/pin{}.csv".format(pin)
 
-    with open(filename, 'w') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(fields)
-        csvwriter.writerows(rows) 
+    with open(filename, 'w', newline='') as csvfile:
+        csvwriter = csv.DictWriter(csvfile, fieldnames=fields)
+        csvwriter.writeheader()
+        #csvwriter.writerow(fields)
+
+        csvwriter.writerow({'Pin': pin,'Time':  datetime.datetime.now().replace(microsecond = 0), 'Moisture': get_value(pin)}) 
+
+def add_value(pin, value):
+    print(pin, value)
+    fields = ['Pin', 'Time', 'Moisture']
+    with open("csvfiles/pin{}.csv".format(pin), 'a') as csvfile:
+        csvwriter = csv.DictWriter(csvfile, fields)
+        csvwriter.writerow({'Pin': pin, 'Time' : datetime.datetime.now().replace(microsecond = 0), 'Moisture': value})
 
 def rename_file(current_name, new_name):
-    os.rename("{}.csv".format(current_name), "{}.csv".format(new_name))
+    os.rename("csvfiles/{}.csv".format(current_name), "csvfiles/{}.csv".format(new_name))
 
 if __name__ == "__main__":
     try:
+        setup = True
         while True:
 
             #Check if a pin is active
-            for i in range(7):
-                if get_value(i) > 2:
-                    create_table(i)
+            if setup:
+                for i in range(7):
+                    if get_value(i) > 2:
+                        create_table(i)
+                    time.sleep(1)
+            else:
+                #for i in range(7):
+                    #if get_value(i) > 2:
+                add_value(0,get_value(0))
+                time.sleep(1)
 
-            df = pd.read_csv("pin0.csv")
+            df = pd.read_csv("csvfiles/pin0.csv")
             
-            rename_file("pin0", "pins")
+            #rename_file("pin0", "pins")
 
             print(df)
-            
-            time.sleep(500)
+            setup = False
+            time.sleep(5)
 
     except KeyboardInterrupt:
         print("Cancel.")
