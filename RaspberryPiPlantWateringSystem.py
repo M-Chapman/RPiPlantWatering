@@ -31,7 +31,7 @@ def get_moisture(channel):
 def create_table(channel):
     #CSV file creation for soil moisture level
     #Accepts an integer in the range 0 to 7
-    if 0 < channel < 7:
+    if 0 <= channel <= 7:
         fields = ['channel', 'Time', 'Moisture']
         filename = "csvfiles/moisturechannel{}.csv".format(channel)
 
