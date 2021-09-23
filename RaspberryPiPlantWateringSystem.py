@@ -48,7 +48,7 @@ def add_moisture(channel, value):
     #Adds the soil moisture level to the csv file of the specified channel
     #Accepts an integer and float
     fields = ['channel', 'Time', 'Moisture']
-    with open("csvfiles/moisturechannel.csv".format(channel), 'a') as csvfile:
+    with open("csvfiles/moisturechannel{}.csv".format(channel), 'a') as csvfile:
         csvwriter = csv.DictWriter(csvfile, fields)
         csvwriter.writerow({'channel': channel, 'Time' : datetime.datetime.now().replace(microsecond = 0), 'Moisture': value})
 
@@ -78,8 +78,8 @@ if __name__ == "__main__":
                     add_moisture(i,get_moisture(i))
                     time.sleep(1)
 
-            # df = pd.read_csv("csvfiles/channel0.csv")
-
+            # df = pd.read_csv("csvfiles/pin0.csv")
+            # df.plot()
             # print(df)
 
             time.sleep(5)
