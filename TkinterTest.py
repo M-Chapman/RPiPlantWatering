@@ -21,8 +21,8 @@ GUI.geometry("800x600")
 
 def task():
     print('Hello World!')
-    GUI.after(2000,task)
+    GUI.after(20000,task) # 20 seconds delay
 
-GUI.after(2000, task)
+GUI.after(0, task)
 
 GUI.mainloop()

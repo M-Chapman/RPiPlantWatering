@@ -6,6 +6,7 @@ import time
 import csv
 import os
 import tkinter as tk
+from tkinter import messagebox as tkMessageBox
 import numpy as np
 import pandas as pd
 
@@ -41,14 +42,14 @@ def background():
                 # Checks if a channel is active
                 create_table(i)
                 active_channels.append(i)
-                
+
         setup = False
         GUI.after(2000, background)
     else:
         # Runs after first time
         for i in active_channels:
             add_moisture(i, get_moisture(i))
-            
+
     counter += 1
     print('Background has run {} times'.format(counter))
 
@@ -104,13 +105,16 @@ def add_moisture(channel, value):
         print("The channel specified ({}) is outside the valid range (0 to 7)"
               .format(channel))
 
+
 def auto_water():
     # auto_water turns the watering pump on when moisture level falls below specified %
     return None
 
+
 def water_threshold():
     # water_threshold changes the % soil moisture before the water pump turns on
     return None
+
 
 def manual_water():
     # Manual water turns the water pump on for 1 second
@@ -124,19 +128,43 @@ def manual_water():
     GPIO.output(pump_pin, GPIO.HIGH)
 
 
+def sel():
+    selection = "you selected option: "
+
+
+def rename_popup():
+    #pop_up = tkMessageBox.showinfo('Rename a file', 'Choose file to rename')
+    popup_main = tk.Toplevel(GUI)
+    files = [f for f in os.listdir('csvfiles') if os.path.isfile(
+        os.path.join('csvfiles', f))]
+    files.sort()
+    file_list = []
+    for i in range(len(files)-1):
+        file_list.append(tk.Radiobutton(
+            popup_main, text=files[i], value=i, command=sel))
+    for i in range(len(files)-1):
+        file_list[i].pack()
+    submit_Button = tk.Button(popup_main, text='Submit').pack()
+
+
 def rename_file(current_name, new_name):
     # Renames the specified .csv file to a new name
     # Accepts 2 strings
+    files = [f for f in os.listdir('csvfiles') if os.path.isfile(
+        os.path.join('csvfiles', f))]
+
     os.rename("csvfiles/{}.csv".format(current_name),
               "csvfiles/{}.csv".format(new_name))
 
-auto_water_button = tk.Button(GUI, fg = 'blue', text='Turn Automatic Watering ON', command=auto_water)
-water_threshold_button = tk.Button(GUI, fg = 'blue', text='Set Soil Moisture Level', command=water_threshold)
-manual_water_button = tk.Button(GUI, fg = 'blue', text='Manual Water', command=manual_water)
 
-auto_water_button.pack()
-water_threshold_button.pack()
-manual_water_button.pack()
+auto_water_button = tk.Button(
+    GUI, fg='blue', text='Turn Automatic Watering ON', command=auto_water).pack()
+rename_button = tk.Button(
+    GUI, fg='blue', text='Rename a File', command=rename_popup).pack()
+water_threshold_button = tk.Button(
+    GUI, fg='blue', text='Set Soil Moisture Level', command=water_threshold).pack()
+manual_water_button = tk.Button(
+    GUI, fg='blue', text='Manual Water', command=manual_water).pack()
 
 GUI.after(2000, background)
 GUI.mainloop()
