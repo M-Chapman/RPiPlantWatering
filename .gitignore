@@ -3,3 +3,5 @@ lib/
 pyvenv.cfg
 share/
 csvfiles/
+plottest.py
+TkinterTest.py

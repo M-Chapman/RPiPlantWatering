@@ -39,14 +39,14 @@ def auto_water_boolean():
 
 
 def background():
-    # Background runs the soil moisture monitoring
-    # Changes the global variable setup to only run once and then begins monitoring soil moisture
+    # Background runs from the launch of the GUI
+    # it records the soil moisture levels and controls automatic watering
 
-    # Global variables to be changed or compared based on run environment
     global setup
     global active_channels
     global counter
     global auto_water_bool
+    # Global variables to be changed or compared based on run environment
 
     if setup:
         # Runs for first time only
@@ -67,6 +67,7 @@ def background():
             add_moisture(i, counter)
 
     if auto_water_bool:
+        # automatic watering is turned on
         GUI.after(5000, auto_water)
 
     counter += 1
@@ -178,6 +179,7 @@ def auto_water():
     last_line_csv = load_csv("pin0")[-1][-1]
     print(last_line_csv)
     if float(last_line_csv) <= 30:
+        # **CURRENTLY ONLY WATERS AT <=30 PERCENT MAX MOISTURE VALUE**
         manual_water()
 
     return None
