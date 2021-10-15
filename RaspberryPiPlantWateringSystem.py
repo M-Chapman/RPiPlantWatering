@@ -24,17 +24,25 @@ GUI.geometry("800x600")
 frame = tk.Frame(GUI)
 frame.pack()
 
+# Global Booleans for first loop and auto watering loop
 setup = True
 auto_water_bool = False
 
+
 def auto_water_boolean():
+    # auto_water_boolean changes the global boolean auto_water_bool to True or False
+    # Determines wether auto_water() is run in background()
+
     global auto_water_bool
     auto_water_bool = not auto_water_bool
     return None
 
+
 def background():
     # Background runs the soil moisture monitoring
     # Changes the global variable setup to only run once and then begins monitoring soil moisture
+
+    # Global variables to be changed or compared based on run environment
     global setup
     global active_channels
     global counter
@@ -47,19 +55,20 @@ def background():
         for i in range(7):
             if get_moisture(i) > 2:
                 # Checks if a channel is active
-                create_table(i)
+                create_table(i, counter)
                 active_channels.append(i)
 
         setup = False
         GUI.after(2000, background)
     else:
         # Runs after first time
+        # Undefined can be ignored as this is inaccessible before declaration of variables
         for i in active_channels:
-            add_moisture(i, get_moisture(i))
+            add_moisture(i, counter)
 
     if auto_water_bool:
-        GUI.after(5000,auto_water)
-    
+        GUI.after(5000, auto_water)
+
     counter += 1
     print('Background has run {} times'.format(counter))
 
@@ -67,13 +76,19 @@ def background():
 
 
 def get_status(pin):
+    # **NOT CURRENTLY USED**
+    # get_status queries the current status of a RPi pin
+    # Accepts an integer
+
     GPIO.setup(pin, GPIO.IN)
     return GPIO.input(pin)
 
 
 def get_moisture(channel):
+    # get_moisture obtains the value of a specified channel of the ADC
     # Returns the percentage soil moisture level as a float (0 to 100)
     # Accepts an integer in the range 0 to 7
+
     if 0 <= channel <= 7:
         val = spi.xfer2([1, (8+channel) << 4, 0])
         data = ((val[1] & 3) << 8) + val[2]
@@ -83,37 +98,45 @@ def get_moisture(channel):
               .format(channel))
 
 
-def create_table(channel):
+def create_table(channel, loop_counter):
     # CSV file creation for soil moisture level
+    # Uses the ADC channel to determine the generated file name
     # Accepts an integer in the range 0 to 7
+
     if 0 <= channel <= 7:
         fields = ['channel', 'Time', 'Moisture']
-        filename = "csvfiles/moisturechannel{}.csv".format(channel)
-
-        with open(filename, 'w', newline='') as csvfile:
-            csvwriter = csv.DictWriter(csvfile, fieldnames=fields)
-            csvwriter.writeheader()
-            # csvwriter.writerow(fields)
-
-            csvwriter.writerow({'channel': channel, 'Time':  datetime.datetime.now(
-            ).replace(microsecond=0), 'Moisture': get_moisture(channel)})
+        with open("csvfiles/moisturechannel{}.csv".format(channel), 'w', newline='') as csvfile:
+            csv_file_write(fields, channel, csvfile, loop_counter)
     else:
         print("The channel specified ({}) is outside the valid range (0 to 7)"
               .format(channel))
 
 
-def add_moisture(channel, value):
+def add_moisture(channel, loop_counter):
     # Adds the soil moisture level to the csv file of the specified channel
     # Accepts an integer in the range 0 to 7 and float
+
     if 0 <= channel <= 7:
         fields = ['channel', 'Time', 'Moisture']
         with open("csvfiles/moisturechannel{}.csv".format(channel), 'a') as csvfile:
-            csvwriter = csv.DictWriter(csvfile, fields)
-            csvwriter.writerow({'channel': channel, 'Time': datetime.datetime.now(
-            ).replace(microsecond=0), 'Moisture': value})
+            csv_file_write(fields, channel, csvfile, loop_counter)
     else:
         print("The channel specified ({}) is outside the valid range (0 to 7)"
               .format(channel))
+
+
+def csv_file_write(fields, channel, csvfile, loop_counter):
+    # csv_file_write adds the moisture values to the .csv file
+    # It adds a header if the program is running for the first time
+    # Accepts an array, integer, file opening operation and integer
+
+    csvwriter = csv.DictWriter(csvfile, fieldnames=fields)
+    if loop_counter == 0:
+        # -1 is outside the range of values returned by get_moisture()
+        # Runs upon file creation
+        csvwriter.writeheader()
+    csvwriter.writerow({'channel': channel, 'Time': datetime.datetime.now(
+    ).replace(microsecond=0), 'Moisture': get_moisture(channel)})
 
 
 def load_csv(filename):
@@ -150,8 +173,9 @@ def manual_water():
     time.sleep(1)
     GPIO.output(pump_pin, GPIO.HIGH)
 
+
 def auto_water():
-    # auto_water turns the watering pump on when moisture level falls below specified %
+    # auto_water turns the watering pump on when the last read moisture level falls below specified %
     last_line_csv = load_csv("pin0")[-1][-1]
     print(last_line_csv)
     if float(last_line_csv) <= 30:
@@ -161,12 +185,18 @@ def auto_water():
 
 
 def sel():
-    # Function for rename file selection from radiofield
-    # Does not take any arguments
+    # **WIP**
+    # sel identifies the selection from the rename file radiofield
+    # it will then run a function that opens a textbox popup to enter the new file name
+
     selection = "you selected option: "
 
 
 def rename_popup():
+    # **WIP**
+    # rename_popup generates a popup window containing all file names in /csvfiles in a radiofield
+    # goal: user selects a file from the radiofield to rename
+
     #pop_up = tkMessageBox.showinfo('Rename a file', 'Choose file to rename')
     popup_main = tk.Toplevel(GUI)
     files = [f for f in os.listdir('csvfiles') if os.path.isfile(
