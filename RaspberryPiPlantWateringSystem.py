@@ -132,8 +132,7 @@ def csv_file_write(fields, channel, csvfile, loop_counter):
 
     csvwriter = csv.DictWriter(csvfile, fieldnames=fields)
     if loop_counter == 0:
-        # -1 is outside the range of values returned by get_moisture()
-        # Runs upon file creation
+        # Runs upon file creation only
         csvwriter.writeheader()
     csvwriter.writerow({'channel': channel, 'Time': datetime.datetime.now(
     ).replace(microsecond=0), 'Moisture': get_moisture(channel)})
