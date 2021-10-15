@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import messagebox as tkMessageBox
 import numpy as np
 import pandas as pd
+import matplotlib
 
 # GPIO initialisation
 GPIO.setmode(GPIO.BOARD)  # Broadcom pin-numbering scheme
@@ -24,7 +25,12 @@ frame = tk.Frame(GUI)
 frame.pack()
 
 setup = True
+auto_water_bool = False
 
+def auto_water_boolean():
+    global auto_water_bool
+    auto_water_bool = not auto_water_bool
+    return None
 
 def background():
     # Background runs the soil moisture monitoring
@@ -32,6 +38,7 @@ def background():
     global setup
     global active_channels
     global counter
+    global auto_water_bool
 
     if setup:
         # Runs for first time only
@@ -50,6 +57,9 @@ def background():
         for i in active_channels:
             add_moisture(i, get_moisture(i))
 
+    if auto_water_bool:
+        GUI.after(5000,auto_water)
+    
     counter += 1
     print('Background has run {} times'.format(counter))
 
@@ -106,13 +116,26 @@ def add_moisture(channel, value):
               .format(channel))
 
 
-def auto_water():
-    # auto_water turns the watering pump on when moisture level falls below specified %
-    return None
+def load_csv(filename):
+    # load_csv retrieves the content of a specified .csv file
+    # Accepts a String
+    csv_data = []
+    row_index = 0
+    with open("csvfiles/"+filename+".csv", "r", encoding="utf-8", errors="ignore") as scraped:
+        reader = csv.reader(scraped, delimiter=',')
+        for row in reader:
+            if row:  # avoid blank lines
+                row_index += 1
+                columns = [str(row_index), row[0], row[1], row[2]]
+                csv_data.append(columns)
+    return csv_data
 
 
-def water_threshold():
+def water_threshold(new_threshold):
     # water_threshold changes the % soil moisture before the water pump turns on
+    # Accepts an integer
+    global threshold
+    threshold = new_threshold
     return None
 
 
@@ -127,8 +150,19 @@ def manual_water():
     time.sleep(1)
     GPIO.output(pump_pin, GPIO.HIGH)
 
+def auto_water():
+    # auto_water turns the watering pump on when moisture level falls below specified %
+    last_line_csv = load_csv("pin0")[-1][-1]
+    print(last_line_csv)
+    if float(last_line_csv) <= 30:
+        manual_water()
+
+    return None
+
 
 def sel():
+    # Function for rename file selection from radiofield
+    # Does not take any arguments
     selection = "you selected option: "
 
 
@@ -158,7 +192,7 @@ def rename_file(current_name, new_name):
 
 
 auto_water_button = tk.Button(
-    GUI, fg='blue', text='Turn Automatic Watering ON', command=auto_water).pack()
+    GUI, fg='blue', text='Turn Automatic Watering ON', command=auto_water_boolean).pack()
 rename_button = tk.Button(
     GUI, fg='blue', text='Rename a File', command=rename_popup).pack()
 water_threshold_button = tk.Button(
