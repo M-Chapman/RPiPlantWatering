@@ -6,10 +6,13 @@ import time
 import csv
 import os
 import tkinter as tk
-from tkinter import messagebox as tkMessageBox
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+import matplotlib.animation as animation
 import numpy as np
 import pandas as pd
-import matplotlib
+
+
 
 # GPIO initialisation
 GPIO.setmode(GPIO.BOARD)  # Broadcom pin-numbering scheme
@@ -20,14 +23,13 @@ spi.max_speed_hz = 1000000
 # GUI initialisation
 GUI = tk.Tk()
 GUI.title('Raspberry Pi Plant Watering System')
-GUI.geometry("800x600")
+GUI.geometry("500x200")
 frame = tk.Frame(GUI)
 frame.pack()
 
 # Global Booleans for first loop and auto watering loop
 setup = True
 auto_water_bool = False
-
 
 def auto_water_boolean():
     # auto_water_boolean changes the global boolean auto_water_bool to True or False
@@ -36,7 +38,6 @@ def auto_water_boolean():
     global auto_water_bool
     auto_water_bool = not auto_water_bool
     return None
-
 
 def background():
     # Background runs from the launch of the GUI
@@ -47,6 +48,7 @@ def background():
     global counter
     global auto_water_bool
     # Global variables to be changed or compared based on run environment
+
 
     if setup:
         # Runs for first time only
@@ -59,21 +61,79 @@ def background():
                 active_channels.append(i)
 
         setup = False
+
+
         GUI.after(2000, background)
     else:
         # Runs after first time
-        # Undefined can be ignored as this is inaccessible before declaration of variables
+        # Undefined can be ignored as this is inaccessible before declaration of variables        
+        
         for i in active_channels:
             add_moisture(i, counter)
 
     if auto_water_bool:
-        # automatic watering is turned on
+        # automatic watering is ON
         GUI.after(5000, auto_water)
 
     counter += 1
     print('Background has run {} times'.format(counter))
 
     GUI.after(5000, background)
+
+def open_moisture_graph():
+    # open_moisture_graph opens a new window containing the soil moisture level over time
+    moisture_graph_window = tk.Toplevel(GUI)
+    moisture_label = tk.Label(moisture_graph_window, text='Soil Moisture Level').pack()
+
+    df = pd.read_csv("csvfiles/moisturechannel0.csv")
+
+    if len(df['Time']) < 2:
+        no_data_msg = tk.Text(moisture_graph_window)
+        no_data_msg.insert(tk.END, chars='There is no data to display')
+        no_data_msg.pack()
+    else:
+        moistures = df['Moisture']
+
+        fig = Figure(figsize=(6,4), dpi=100)
+
+        # Formatting of x-axis 
+        xAxis = []
+        last = ''
+        xTicks = []
+        for i in range(len(df['Time'])):
+
+            if i == 0:
+                xAxis.append(df['Time'][i][5:-3])
+                last = df['Time'][i]
+                xTicks.append(i)
+                
+            if i % 10 == 0 and i > 0:
+                if last[5:10] == df['Time'][i][5:10]:
+                    xAxis.append(df['Time'][i][11:-3])
+                else:
+                    xAxis.append(df['Time'][i][5:-3]) 
+                last = df['Time'][i]
+                xTicks.append(i)
+                
+            if i == len(df['Time'])-1:
+                xAxis.append(df['Time'][i][5:-3])
+                xTicks.append(i)
+
+        # Formatting of plot
+        a = fig.add_subplot(111)
+        a.set_xticks(xTicks)
+        a.plot(df['Time'], moistures)
+        a.set_xticklabels(xAxis, rotation=30, horizontalalignment='right')
+        a.set_xlabel('Time of Reading')
+        a.set_ylabel('Soil Moisture %')
+        fig.subplots_adjust(bottom=0.23)
+
+        canvas = FigureCanvasTkAgg(fig, master=moisture_graph_window)
+
+        canvas.get_tk_widget().pack()
+        toolbar = NavigationToolbar2Tk(canvas, moisture_graph_window)
+        toolbar.update()
+
 
 
 def get_status(pin):
@@ -230,6 +290,9 @@ water_threshold_button = tk.Button(
     GUI, fg='blue', text='Set Soil Moisture Level', command=water_threshold).pack()
 manual_water_button = tk.Button(
     GUI, fg='blue', text='Manual Water', command=manual_water).pack()
+moisture_visualisation_button = tk.Button(
+    GUI, fg='blue', text='Show Soil Moisture Level', command=open_moisture_graph).pack()
+
 
 GUI.after(2000, background)
 GUI.mainloop()
