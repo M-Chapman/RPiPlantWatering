@@ -47,12 +47,14 @@ def background():
     global active_channels
     global counter
     global auto_water_bool
+    global threshold
     # Global variables to be changed or compared based on run environment
 
 
     if setup:
         # Runs for first time only
         active_channels = []
+        threshold = 30
         counter = 0
         for i in range(7):
             if get_moisture(i) > 2:
@@ -82,8 +84,8 @@ def background():
 
 def open_moisture_graph():
     # open_moisture_graph opens a new window containing the soil moisture level over time
+
     moisture_graph_window = tk.Toplevel(GUI)
-    moisture_label = tk.Label(moisture_graph_window, text='Soil Moisture Level').pack()
 
     df = pd.read_csv("csvfiles/moisturechannel0.csv")
 
@@ -126,6 +128,7 @@ def open_moisture_graph():
         a.set_xticklabels(xAxis, rotation=30, horizontalalignment='right')
         a.set_xlabel('Time of Reading')
         a.set_ylabel('Soil Moisture %')
+        a.set_title('Soil Moisture Level over Time')
         fig.subplots_adjust(bottom=0.23)
 
         canvas = FigureCanvasTkAgg(fig, master=moisture_graph_window)
@@ -133,6 +136,8 @@ def open_moisture_graph():
         canvas.get_tk_widget().pack()
         toolbar = NavigationToolbar2Tk(canvas, moisture_graph_window)
         toolbar.update()
+
+    exit_button = tk.Button(moisture_graph_window, text = 'Exit', command = moisture_graph_window.destroy).pack()
 
 
 
@@ -236,7 +241,10 @@ def manual_water():
 
 def auto_water():
     # auto_water turns the watering pump on when the last read moisture level falls below specified %
+
     last_line_csv = load_csv("pin0")[-1][-1]
+    global threshold
+
     print(last_line_csv)
     if float(last_line_csv) <= 30:
         # **CURRENTLY ONLY WATERS AT <=30 PERCENT MAX MOISTURE VALUE**
