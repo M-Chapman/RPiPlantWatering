@@ -36,15 +36,23 @@ threshold = 30
 # Global Booleans for first loop and auto watering loop
 setup = True
 auto_water_bool = False
+sms_bool = False
+moisture_below = False
 
 
 def auto_water_boolean():
     # auto_water_boolean changes the global boolean auto_water_bool to True or False
-    # Determines wether auto_water() is run in background()
+    # Determines wether manual_water() is run in moisturewatch()
 
     global auto_water_bool
     auto_water_bool = not auto_water_bool
-    return None
+
+def sms_boolean():
+    # sms_boolean changes the global boolean sms_bool to True or False
+    # Determines wether smd_sms() is run in moisture_watch()
+
+    global sms_bool
+    sms_bool = not sms_bool
 
 
 def background():
@@ -79,9 +87,8 @@ def background():
         for i in active_channels:
             add_moisture(i, counter)
 
-    if auto_water_bool:
-        # automatic watering is ON
-        GUI.after(5000, auto_water)
+
+    GUI.after(5000, moisture_watch)
 
     counter += 1
     print('Background has run {} times'.format(counter))
@@ -256,23 +263,37 @@ def water_threshold(threshold):
 def manual_water():
     # Manual water turns the water pump on for 1 second
     # Requires the water pump to be connected to GPIO pin 7 on the Raspberry Pi
-    pump_pin = 7
-    GPIO.setup(pump_pin, GPIO.OUT)
-    GPIO.output(pump_pin, GPIO.LOW)
-    GPIO.output(pump_pin, GPIO.HIGH)
-    GPIO.output(pump_pin, GPIO.LOW)
-    time.sleep(1)
-    GPIO.output(pump_pin, GPIO.HIGH)
 
+    print('WATERING')
+    # pump_pin = 7
+    # GPIO.setup(pump_pin, GPIO.OUT)
+    # GPIO.output(pump_pin, GPIO.LOW)
+    # GPIO.output(pump_pin, GPIO.HIGH)
+    # GPIO.output(pump_pin, GPIO.LOW)
+    # time.sleep(1)
+    # GPIO.output(pump_pin, GPIO.HIGH)
 
-def auto_water():
-    # auto_water turns the watering pump on when the last read moisture level falls below specified %
-
-    last_line_csv = load_csv("moisturechannel0")[-1][-1]
+def moisture_watch():
     global threshold
-    if float(last_line_csv) <= int(threshold):
-        print('AUTOWATERING')
-        # manual_water()
+    global auto_water_bool
+    global sms_bool
+
+    moisture = float(load_csv("moisturechannel0")[-1][-1])
+    threshold = int(threshold)
+
+    if moisture > threshold:
+        moisture_below = False
+
+    if moisture < threshold:
+
+        if not moisture_below:
+            moisture_below = True
+
+            if sms_bool:
+                send_sms(load_csv("moisturechannel0")[-1][-1])
+
+        if auto_water_bool:
+            manual_water()
 
 
 def send_sms(last_moisture):
@@ -283,9 +304,7 @@ def send_sms(last_moisture):
     with open('authtkn.txt', 'r') as f:
         auth_token = f.readlines()
 
-    print(auth_token[2:-2])
-
-    client = Client(account_sid, auth_token[2:-2])
+    client = Client(account_sid, auth_token[0])
 
     message = client.messages.create(
         messaging_service_sid='MG3a937b8d59947201ea4ccbe9daad8b43', body='Your plant needs watering, the soil moisture level is {}'.format(last_moisture), to='+447525767361')
@@ -340,7 +359,7 @@ manual_water_button = tk.Button(
 moisture_visualisation_button = tk.Button(
     GUI, fg='blue', text='Show Soil Moisture Level Over Time', command=open_moisture_graph).pack()
 message_button = tk.Button(
-    GUI, fg='blue', text='Send SMS text', command=lambda: send_sms(load_csv("csvfiles/moisturechannel0")[-1][-1])).pack()
+    GUI, fg='blue', text='Send SMS text', command=lambda: sms_boolean()).pack()
 
 GUI.after(2000, background)
 GUI.mainloop()
