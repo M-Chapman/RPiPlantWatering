@@ -27,7 +27,7 @@ spi.max_speed_hz = 1000000
 # GUI initialisation
 GUI = tk.Tk()
 GUI.title('Raspberry Pi Plant Watering System')
-GUI.geometry("500x200")
+GUI.geometry("500x250")
 frame = tk.Frame(GUI)
 frame.pack()
 
@@ -38,6 +38,7 @@ setup = True
 auto_water_bool = False
 sms_bool = False
 moisture_below = False
+phone_number = ''
 
 
 def auto_water_boolean():
@@ -311,6 +312,31 @@ def send_sms(last_moisture):
 
     print(message.sid)
 
+def change_sms():
+    # change_sms changes the phone number text SMS are sent to
+
+    def get_number():
+        global phone_number
+        phone_number = phoneno_text_box.get('1.0', tk.END)
+        # phoneno_current.insert(tk.END, phone_number)
+
+    phoneno_entry_window = tk.Toplevel(GUI)
+    current_phoneno_label = tk.Label(
+        phoneno_entry_window, text='The current phone number is ').pack()
+    phoneno_current = tk.Text(phoneno_entry_window, height=1, width=15)
+    phoneno_current.insert(tk.END, phone_number)
+    phoneno_current.config(state=DISABLED)
+    phoneno_current.pack()
+    phoneno_label = tk.Label(
+        phoneno_entry_window, text='Enter a value').pack()
+    phoneno_text_box = tk.Text(phoneno_entry_window, height=1, width=15)
+    phoneno_text_box.pack()
+
+    submit_Button = tk.Button(
+        phoneno_entry_window, text='Submit', command=lambda: get_number()).pack()
+    exit_button = tk.Button(phoneno_entry_window, text='Exit',
+                            command=phoneno_entry_window.destroy).pack()
+
 
 def sel():
     # **WIP**
@@ -360,6 +386,8 @@ moisture_visualisation_button = tk.Button(
     GUI, fg='blue', text='Show Soil Moisture Level Over Time', command=open_moisture_graph).pack()
 message_button = tk.Button(
     GUI, fg='blue', text='Send SMS text', command=lambda: sms_boolean()).pack()
+phoneno_button = tk.Button(
+    GUI, fg='blue', text='Change SMS number', command=change_sms).pack()
 
 GUI.after(2000, background)
 GUI.mainloop()
