@@ -268,25 +268,27 @@ def manual_water():
 def auto_water():
     # auto_water turns the watering pump on when the last read moisture level falls below specified %
 
-    last_line_csv = load_csv("pin0")[-1][-1]
+    last_line_csv = load_csv("moisturechannel0")[-1][-1]
     global threshold
-
-    if float(last_line_csv) <= threshold:
-        # **CURRENTLY ONLY WATERS AT <=30 PERCENT MAX MOISTURE VALUE**
-        manual_water()
-
-    return None
+    if float(last_line_csv) <= int(threshold):
+        print('AUTOWATERING')
+        # manual_water()
 
 
-def send_sms():
+def send_sms(last_moisture):
+    # send_sms sends a text message to the specified number when the soil moisture level falls below the threshold
+    
     account_sid = 'AC4a8c4824464ddea06e3c5df97d9a76aa'
+
     with open('authtkn.txt', 'r') as f:
         auth_token = f.readlines()
 
-    client = Client(account_sid, auth_token)
+    print(auth_token[2:-2])
+
+    client = Client(account_sid, auth_token[2:-2])
 
     message = client.messages.create(
-        messaging_service_sid='MG3a937b8d59947201ea4ccbe9daad8b43', body='hi', to='+447525767361')
+        messaging_service_sid='MG3a937b8d59947201ea4ccbe9daad8b43', body='Your plant needs watering, the soil moisture level is {}'.format(last_moisture), to='+447525767361')
 
     print(message.sid)
 
@@ -337,7 +339,8 @@ manual_water_button = tk.Button(
     GUI, fg='blue', text='Manual Water', command=manual_water).pack()
 moisture_visualisation_button = tk.Button(
     GUI, fg='blue', text='Show Soil Moisture Level Over Time', command=open_moisture_graph).pack()
-
+message_button = tk.Button(
+    GUI, fg='blue', text='Send SMS text', command=lambda: send_sms(load_csv("csvfiles/moisturechannel0")[-1][-1])).pack()
 
 GUI.after(2000, background)
 GUI.mainloop()

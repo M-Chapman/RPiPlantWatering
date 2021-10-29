@@ -5,3 +5,5 @@ share/
 csvfiles/
 plottest.py
 TkinterTest.py
+authtkn.txt
+test.py
