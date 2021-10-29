@@ -1,4 +1,5 @@
 # Raspberry Pi Plant Watering System
+from tkinter.constants import DISABLED
 import RPi.GPIO as GPIO
 import spidev
 import datetime
@@ -11,7 +12,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import matplotlib.animation as animation
 import numpy as np
 import pandas as pd
-
 
 
 # GPIO initialisation
@@ -27,9 +27,12 @@ GUI.geometry("500x200")
 frame = tk.Frame(GUI)
 frame.pack()
 
+threshold = 30
+
 # Global Booleans for first loop and auto watering loop
 setup = True
 auto_water_bool = False
+
 
 def auto_water_boolean():
     # auto_water_boolean changes the global boolean auto_water_bool to True or False
@@ -38,6 +41,7 @@ def auto_water_boolean():
     global auto_water_bool
     auto_water_bool = not auto_water_bool
     return None
+
 
 def background():
     # Background runs from the launch of the GUI
@@ -49,7 +53,6 @@ def background():
     global auto_water_bool
     global threshold
     # Global variables to be changed or compared based on run environment
-
 
     if setup:
         # Runs for first time only
@@ -64,12 +67,11 @@ def background():
 
         setup = False
 
-
         GUI.after(2000, background)
     else:
         # Runs after first time
-        # Undefined can be ignored as this is inaccessible before declaration of variables        
-        
+        # Undefined can be ignored as this is inaccessible before declaration of variables
+
         for i in active_channels:
             add_moisture(i, counter)
 
@@ -81,6 +83,7 @@ def background():
     print('Background has run {} times'.format(counter))
 
     GUI.after(5000, background)
+
 
 def open_moisture_graph():
     # open_moisture_graph opens a new window containing the soil moisture level over time
@@ -96,9 +99,9 @@ def open_moisture_graph():
     else:
         moistures = df['Moisture']
 
-        fig = Figure(figsize=(6,4), dpi=100)
+        fig = Figure(figsize=(6, 4), dpi=100)
 
-        # Formatting of x-axis 
+        # Formatting of x-axis
         xAxis = []
         last = ''
         xTicks = []
@@ -108,15 +111,15 @@ def open_moisture_graph():
                 xAxis.append(df['Time'][i][5:-3])
                 last = df['Time'][i]
                 xTicks.append(i)
-                
+
             if i % 10 == 0 and i > 0:
                 if last[5:10] == df['Time'][i][5:10]:
                     xAxis.append(df['Time'][i][11:-3])
                 else:
-                    xAxis.append(df['Time'][i][5:-3]) 
+                    xAxis.append(df['Time'][i][5:-3])
                 last = df['Time'][i]
                 xTicks.append(i)
-                
+
             if i == len(df['Time'])-1:
                 xAxis.append(df['Time'][i][5:-3])
                 xTicks.append(i)
@@ -137,8 +140,8 @@ def open_moisture_graph():
         toolbar = NavigationToolbar2Tk(canvas, moisture_graph_window)
         toolbar.update()
 
-    exit_button = tk.Button(moisture_graph_window, text = 'Exit', command = moisture_graph_window.destroy).pack()
-
+    exit_button = tk.Button(moisture_graph_window, text='Exit',
+                            command=moisture_graph_window.destroy).pack()
 
 
 def get_status(pin):
@@ -219,12 +222,31 @@ def load_csv(filename):
     return csv_data
 
 
-def water_threshold(new_threshold):
+def water_threshold(threshold):
     # water_threshold changes the % soil moisture before the water pump turns on
     # Accepts an integer
-    global threshold
-    threshold = new_threshold
-    return None
+
+    def get_threshold():
+        global threshold
+        threshold = threshold_text_box.get('1.0', tk.END)
+        threshold_current.insert(tk.END, threshold)
+
+    threshold_entry_window = tk.Toplevel(GUI)
+    current_threshold_label = tk.Label(
+        threshold_entry_window, text='The current threshold is ').pack()
+    threshold_current = tk.Text(threshold_entry_window, height=1, width=5)
+    threshold_current.insert(tk.END, threshold)
+    threshold_current.config(state=DISABLED)
+    threshold_current.pack()
+    threshold_label = tk.Label(
+        threshold_entry_window, text='Enter a value').pack()
+    threshold_text_box = tk.Text(threshold_entry_window, height=1, width=10)
+    threshold_text_box.pack()
+
+    submit_Button = tk.Button(
+        threshold_entry_window, text='Submit', command=lambda: get_threshold()).pack()
+    exit_button = tk.Button(threshold_entry_window, text='Exit',
+                            command=threshold_entry_window.destroy).pack()
 
 
 def manual_water():
@@ -245,8 +267,7 @@ def auto_water():
     last_line_csv = load_csv("pin0")[-1][-1]
     global threshold
 
-    print(last_line_csv)
-    if float(last_line_csv) <= 30:
+    if float(last_line_csv) <= threshold:
         # **CURRENTLY ONLY WATERS AT <=30 PERCENT MAX MOISTURE VALUE**
         manual_water()
 
@@ -266,7 +287,6 @@ def rename_popup():
     # rename_popup generates a popup window containing all file names in /csvfiles in a radiofield
     # goal: user selects a file from the radiofield to rename
 
-    #pop_up = tkMessageBox.showinfo('Rename a file', 'Choose file to rename')
     popup_main = tk.Toplevel(GUI)
     files = [f for f in os.listdir('csvfiles') if os.path.isfile(
         os.path.join('csvfiles', f))]
@@ -295,11 +315,11 @@ auto_water_button = tk.Button(
 rename_button = tk.Button(
     GUI, fg='blue', text='Rename a File', command=rename_popup).pack()
 water_threshold_button = tk.Button(
-    GUI, fg='blue', text='Set Soil Moisture Level', command=water_threshold).pack()
+    GUI, fg='blue', text='Set Soil Moisture Threshold', command=lambda: water_threshold(threshold)).pack()
 manual_water_button = tk.Button(
     GUI, fg='blue', text='Manual Water', command=manual_water).pack()
 moisture_visualisation_button = tk.Button(
-    GUI, fg='blue', text='Show Soil Moisture Level', command=open_moisture_graph).pack()
+    GUI, fg='blue', text='Show Soil Moisture Level Over Time', command=open_moisture_graph).pack()
 
 
 GUI.after(2000, background)
