@@ -1,5 +1,6 @@
 # Raspberry Pi Plant Watering System
 from tkinter.constants import DISABLED
+from twilio.rest import Client
 import RPi.GPIO as GPIO
 import spidev
 import datetime
@@ -272,6 +273,19 @@ def auto_water():
         manual_water()
 
     return None
+
+
+def send_sms():
+    account_sid = 'AC4a8c4824464ddea06e3c5df97d9a76aa'
+    with open('authtkn.txt', 'r') as f:
+        auth_token = f.readlines()
+
+    client = Client(account_sid, auth_token)
+
+    message = client.messages.create(
+        messaging_service_sid='MG3a937b8d59947201ea4ccbe9daad8b43', body='hi', to='+447525767361')
+
+    print(message.sid)
 
 
 def sel():
