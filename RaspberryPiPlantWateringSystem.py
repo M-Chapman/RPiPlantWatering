@@ -241,7 +241,6 @@ def water_threshold(threshold):
     def get_threshold():
         global threshold
         threshold = threshold_text_box.get('1.0', tk.END)
-        threshold_current.insert(tk.END, threshold)
 
     threshold_entry_window = tk.Toplevel(GUI)
     current_threshold_label = tk.Label(
@@ -299,7 +298,8 @@ def moisture_watch():
 
 def send_sms(last_moisture):
     # send_sms sends a text message to the specified number when the soil moisture level falls below the threshold
-    
+    global phone_number
+
     account_sid = 'AC4a8c4824464ddea06e3c5df97d9a76aa'
 
     with open('authtkn.txt', 'r') as f:
@@ -308,7 +308,7 @@ def send_sms(last_moisture):
     client = Client(account_sid, auth_token[0])
 
     message = client.messages.create(
-        messaging_service_sid='MG3a937b8d59947201ea4ccbe9daad8b43', body='Your plant needs watering, the soil moisture level is {}'.format(last_moisture), to='+447525767361')
+        messaging_service_sid='MG3a937b8d59947201ea4ccbe9daad8b43', body='Your plant needs watering, the soil moisture level is {}'.format(last_moisture), to=phone_number)
 
     print(message.sid)
 
@@ -316,9 +316,9 @@ def change_sms():
     # change_sms changes the phone number text SMS are sent to
 
     def get_number():
+        # get_number obtains the entered phone number in the text box
         global phone_number
         phone_number = phoneno_text_box.get('1.0', tk.END)
-        # phoneno_current.insert(tk.END, phone_number)
 
     phoneno_entry_window = tk.Toplevel(GUI)
     current_phoneno_label = tk.Label(
