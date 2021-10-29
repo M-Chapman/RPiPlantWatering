@@ -48,6 +48,7 @@ def auto_water_boolean():
     global auto_water_bool
     auto_water_bool = not auto_water_bool
 
+
 def sms_boolean():
     # sms_boolean changes the global boolean sms_bool to True or False
     # Determines wether smd_sms() is run in moisture_watch()
@@ -87,7 +88,6 @@ def background():
 
         for i in active_channels:
             add_moisture(i, counter)
-
 
     GUI.after(5000, moisture_watch)
 
@@ -273,6 +273,7 @@ def manual_water():
     # time.sleep(1)
     # GPIO.output(pump_pin, GPIO.HIGH)
 
+
 def moisture_watch():
     global threshold
     global auto_water_bool
@@ -312,6 +313,7 @@ def send_sms(last_moisture):
 
     print(message.sid)
 
+
 def change_sms():
     # change_sms changes the phone number text SMS are sent to
 
@@ -328,7 +330,7 @@ def change_sms():
     phoneno_current.config(state=DISABLED)
     phoneno_current.pack()
     phoneno_label = tk.Label(
-        phoneno_entry_window, text='Enter a value').pack()
+        phoneno_entry_window, text='Enter a Phone Number (e.g.+447123456789)').pack()
     phoneno_text_box = tk.Text(phoneno_entry_window, height=1, width=15)
     phoneno_text_box.pack()
 
@@ -338,46 +340,8 @@ def change_sms():
                             command=phoneno_entry_window.destroy).pack()
 
 
-def sel():
-    # **WIP**
-    # sel identifies the selection from the rename file radiofield
-    # it will then run a function that opens a textbox popup to enter the new file name
-
-    selection = "you selected option: "
-
-
-def rename_popup():
-    # **WIP**
-    # rename_popup generates a popup window containing all file names in /csvfiles in a radiofield
-    # goal: user selects a file from the radiofield to rename
-
-    popup_main = tk.Toplevel(GUI)
-    files = [f for f in os.listdir('csvfiles') if os.path.isfile(
-        os.path.join('csvfiles', f))]
-    files.sort()
-    file_list = []
-    for i in range(len(files)-1):
-        file_list.append(tk.Radiobutton(
-            popup_main, text=files[i], value=i, command=sel))
-    for i in range(len(files)-1):
-        file_list[i].pack()
-    submit_Button = tk.Button(popup_main, text='Submit').pack()
-
-
-def rename_file(current_name, new_name):
-    # Renames the specified .csv file to a new name
-    # Accepts 2 strings
-    files = [f for f in os.listdir('csvfiles') if os.path.isfile(
-        os.path.join('csvfiles', f))]
-
-    os.rename("csvfiles/{}.csv".format(current_name),
-              "csvfiles/{}.csv".format(new_name))
-
-
 auto_water_button = tk.Button(
     GUI, fg='blue', text='Turn Automatic Watering ON', command=auto_water_boolean).pack()
-rename_button = tk.Button(
-    GUI, fg='blue', text='Rename a File', command=rename_popup).pack()
 water_threshold_button = tk.Button(
     GUI, fg='blue', text='Set Soil Moisture Threshold', command=lambda: water_threshold(threshold)).pack()
 manual_water_button = tk.Button(
