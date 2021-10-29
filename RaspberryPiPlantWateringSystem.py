@@ -1,4 +1,7 @@
 # Raspberry Pi Plant Watering System
+# NOTE: To run the program on VSCode you must do so via the terminal (not sure if the issue is replicable)
+# "python3 RaspberryPiPlantWateringSystem.py"
+
 from tkinter.constants import DISABLED
 from twilio.rest import Client
 import RPi.GPIO as GPIO
