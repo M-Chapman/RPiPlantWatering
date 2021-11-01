@@ -354,7 +354,9 @@ def change_sms():
     exit_button = tk.Button(phoneno_entry_window, text='Exit',
                             command=phoneno_entry_window.destroy).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
 
-graph_label = tk.Label(GUI, text='ADC Channel 0 Soil Moisture Level Over Time', font='Helvetica 14 bold').grid(row=0,column=0)
+
+graph_label = tk.Label(GUI, text='ADC Channel 0 Soil Moisture Level Over Time',
+                       font='Helvetica 14 bold').grid(row=0, column=0)
 
 watering_label = tk.Label(GUI, text='Plant Watering Controls', font='Helvetica 14 bold').grid(
     row=2, column=0, sticky='ew', pady=7)
