@@ -49,10 +49,10 @@ def auto_water_boolean():
     auto_water_bool = not auto_water_bool
     if auto_water_bool:
         auto_water_button = tk.Button(
-            GUI, fg='green', text='Turn Automatic Watering OFF', command=auto_water_boolean).grid(row=3, column=0, sticky='ew')
+            GUI, fg='green', text='Turn Automatic Watering OFF', command=auto_water_boolean).grid(row=3, column=0, sticky='ew', pady=1, padx=10)
     else:
         auto_water_button = tk.Button(
-            GUI, fg='red', text='Turn Automatic Watering ON ', command=auto_water_boolean).grid(row=3, column=0, sticky='ew')
+            GUI, fg='red', text='Turn Automatic Watering ON ', command=auto_water_boolean).grid(row=3, column=0, sticky='ew', pady=1, padx=10)
 
 
 def sms_boolean():
@@ -63,10 +63,10 @@ def sms_boolean():
     sms_bool = not sms_bool
     if sms_bool:
         message_button = tk.Button(
-            GUI, fg='green', text='Turn SMS texting OFF', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew')
+            GUI, fg='green', text='Turn SMS texting OFF', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
     else:
         message_button = tk.Button(
-            GUI, fg='red', text='Turn SMS texting ON ', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew')
+            GUI, fg='red', text='Turn SMS texting ON ', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
 
 
 def background():
@@ -115,10 +115,8 @@ def load_moisture_graph():
     # moisture_graph_window = tk.Toplevel(GUI)
 
     df = pd.read_csv("csvfiles/moisturechannel0.csv")
-    no_data_msg = tk.Text(GUI)
 
     if len(df['Time']) > 2:
-        no_data_msg.destroy
         moistures = df['Moisture']
 
         fig = Figure(figsize=(6, 4), dpi=100)
@@ -159,11 +157,6 @@ def load_moisture_graph():
         canvas = FigureCanvasTkAgg(fig, master=GUI)
 
         canvas.get_tk_widget().grid(row=1, column=0, columnspan=2)
-        # toolbar = NavigationToolbar2Tk(canvas, GUI)
-        # toolbar.update()
-
-    # exit_button = tk.Button(GUI, text='Exit',
-    #                         command=GUI.destroy).grid(row=1)
 
 
 def get_moisture(channel):
@@ -266,9 +259,9 @@ def water_threshold(threshold):
     threshold_text_box.grid(row=2, column=0, columnspan=2)
 
     submit_button = tk.Button(
-        threshold_entry_window, text='Submit', command=lambda: get_threshold()).grid(row=3, column=0)
+        threshold_entry_window, text='Submit', command=lambda: get_threshold()).grid(row=3, column=0, sticky='ew', pady=1, padx=10)
     exit_button = tk.Button(threshold_entry_window, text='Exit',
-                            command=threshold_entry_window.destroy).grid(row=3, column=1)
+                            command=threshold_entry_window.destroy).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
 
 
 def manual_water():
@@ -357,29 +350,30 @@ def change_sms():
     phoneno_text_box.grid(row=2, column=0, columnspan=2)
 
     submit_button = tk.Button(
-        phoneno_entry_window, text='Submit', command=lambda: get_number()).grid(row=3, column=0)
+        phoneno_entry_window, text='Submit', command=lambda: get_number()).grid(row=3, column=0, sticky='ew', pady=1, padx=10)
     exit_button = tk.Button(phoneno_entry_window, text='Exit',
-                            command=phoneno_entry_window.destroy).grid(row=3, column=1)
+                            command=phoneno_entry_window.destroy).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
 
+graph_label = tk.Label(GUI, text='ADC Channel 0 Soil Moisture Level Over Time', font='Helvetica 14 bold').grid(row=0,column=0)
 
 watering_label = tk.Label(GUI, text='Plant Watering Controls', font='Helvetica 14 bold').grid(
     row=2, column=0, sticky='ew', pady=7)
 auto_water_button = tk.Button(
-    GUI, fg='red', text='Turn Automatic Watering ON ', command=auto_water_boolean).grid(row=3, column=0, sticky='ew')
+    GUI, fg='red', text='Turn Automatic Watering ON ', command=auto_water_boolean).grid(row=3, column=0, sticky='ew', pady=1, padx=10)
 manual_water_button = tk.Button(
-    GUI, fg='black', text='Manual Water', command=manual_water).grid(row=4, column=0, sticky='ew')
+    GUI, fg='black', text='Manual Water', command=manual_water).grid(row=4, column=0, sticky='ew', pady=1, padx=10)
 
 notification_label = tk.Label(GUI, text='Notification Controls', font='Helvetica 14 bold').grid(
     row=2, column=1, sticky='ew', pady=7)
 message_button = tk.Button(
-    GUI, fg='red', text='Turn SMS texting ON', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew')
+    GUI, fg='red', text='Turn SMS texting ON', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
 phoneno_button = tk.Button(
-    GUI, fg='black', text='Change SMS number', command=change_sms).grid(row=4, column=1, sticky='ew')
+    GUI, fg='black', text='Change SMS number', command=change_sms).grid(row=4, column=1, sticky='ew', pady=1, padx=10)
 
 threshold_label = tk.Label(GUI, text='Water Threshold For Notifications Or Automatic Watering Control', font='Helvetica 14 bold').grid(
     row=5, column=0, columnspan=2, sticky='ew', pady=7)
 water_threshold_button = tk.Button(
-    GUI, fg='black', text='Change Soil Moisture Threshold', command=lambda: water_threshold(threshold)).grid(row=6, column=0, columnspan=2, sticky='ew')
+    GUI, fg='black', text='Change Soil Moisture Threshold', command=lambda: water_threshold(threshold)).grid(row=6, column=0, columnspan=2, sticky='ew', pady=1, padx=10)
 
 background()
 GUI.after(2000, background)
