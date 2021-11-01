@@ -71,7 +71,6 @@ def background():
     if setup:
         # Runs for first time only
         active_channels = []
-        threshold = 30
         counter = 0
         for i in range(7):
             if get_moisture(i) > 2:
@@ -81,7 +80,7 @@ def background():
 
         setup = False
 
-        GUI.after(2000, background)
+        # GUI.after(2000, background)
     else:
         # Runs after first time
         # Undefined can be ignored as this is inaccessible before declaration of variables
@@ -154,15 +153,6 @@ def open_moisture_graph():
 
     exit_button = tk.Button(moisture_graph_window, text='Exit',
                             command=moisture_graph_window.destroy).pack()
-
-
-def get_status(pin):
-    # **NOT CURRENTLY USED**
-    # get_status queries the current status of a RPi pin
-    # Accepts an integer
-
-    GPIO.setup(pin, GPIO.IN)
-    return GPIO.input(pin)
 
 
 def get_moisture(channel):
@@ -278,6 +268,7 @@ def moisture_watch():
     global threshold
     global auto_water_bool
     global sms_bool
+    global moisture_below
 
     moisture = float(load_csv("moisturechannel0")[-1][-1])
     threshold = int(threshold)
@@ -285,7 +276,7 @@ def moisture_watch():
     if moisture > threshold:
         moisture_below = False
 
-    if moisture < threshold:
+    else:
 
         if not moisture_below:
             moisture_below = True
@@ -353,6 +344,7 @@ message_button = tk.Button(
 phoneno_button = tk.Button(
     GUI, fg='blue', text='Change SMS number', command=change_sms).pack()
 
+background()
 GUI.after(2000, background)
 GUI.mainloop()
 GPIO.cleanup()
