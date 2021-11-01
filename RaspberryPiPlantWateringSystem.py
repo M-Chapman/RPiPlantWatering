@@ -2,7 +2,7 @@
 # NOTE: To run the program on VSCode you must do so via the terminal (not sure if the issue is replicable)
 # "python3 RaspberryPiPlantWateringSystem.py"
 
-from tkinter.constants import DISABLED
+from tkinter.constants import DISABLED, NORMAL
 from twilio.rest import Client
 import RPi.GPIO as GPIO
 import spidev
@@ -29,7 +29,7 @@ GUI = tk.Tk()
 GUI.title('Raspberry Pi Plant Watering System')
 GUI.geometry("500x250")
 frame = tk.Frame(GUI)
-frame.pack()
+frame.grid()
 
 threshold = 30
 
@@ -87,6 +87,7 @@ def background():
 
         for i in active_channels:
             add_moisture(i, counter)
+    load_moisture_graph()
 
     GUI.after(5000, moisture_watch)
 
@@ -96,18 +97,16 @@ def background():
     GUI.after(5000, background)
 
 
-def open_moisture_graph():
-    # open_moisture_graph opens a new window containing the soil moisture level over time
+def load_moisture_graph():
+    # load_moisture_graph opens a new window containing the soil moisture level over time
 
-    moisture_graph_window = tk.Toplevel(GUI)
+    # moisture_graph_window = tk.Toplevel(GUI)
 
     df = pd.read_csv("csvfiles/moisturechannel0.csv")
+    no_data_msg = tk.Text(GUI)
 
-    if len(df['Time']) < 2:
-        no_data_msg = tk.Text(moisture_graph_window)
-        no_data_msg.insert(tk.END, chars='There is no data to display')
-        no_data_msg.pack()
-    else:
+    if len(df['Time']) > 2:
+        no_data_msg.destroy
         moistures = df['Moisture']
 
         fig = Figure(figsize=(6, 4), dpi=100)
@@ -145,14 +144,14 @@ def open_moisture_graph():
         a.set_title('Soil Moisture Level over Time')
         fig.subplots_adjust(bottom=0.23)
 
-        canvas = FigureCanvasTkAgg(fig, master=moisture_graph_window)
+        canvas = FigureCanvasTkAgg(fig, master=GUI)
 
-        canvas.get_tk_widget().pack()
-        toolbar = NavigationToolbar2Tk(canvas, moisture_graph_window)
-        toolbar.update()
+        canvas.get_tk_widget().grid(row=1, column=0, rowspan=3)
+        # toolbar = NavigationToolbar2Tk(canvas, GUI)
+        # toolbar.update()
 
-    exit_button = tk.Button(moisture_graph_window, text='Exit',
-                            command=moisture_graph_window.destroy).pack()
+    # exit_button = tk.Button(GUI, text='Exit',
+    #                         command=GUI.destroy).grid(row=1)
 
 
 def get_moisture(channel):
@@ -231,23 +230,32 @@ def water_threshold(threshold):
     def get_threshold():
         global threshold
         threshold = threshold_text_box.get('1.0', tk.END)
+        if int(threshold) > 100 or int(threshold) < 0:
+            threshold_error_window = tk.Toplevel(GUI)
+            threshold_error_label = tk.Label(
+                threshold_error_window, text='The entered value is not in the range 0 to 100!').grid(row=0, column=0)
+        else:
+            threshold_current = tk.Text(threshold_entry_window, height=1, width=5)
+            threshold_current.insert(tk.END, threshold)
+            threshold_current.config(state=DISABLED)
+            threshold_current.grid(row=0, column=1)
 
     threshold_entry_window = tk.Toplevel(GUI)
     current_threshold_label = tk.Label(
-        threshold_entry_window, text='The current threshold is ').pack()
+        threshold_entry_window, text='The current threshold is ').grid(row=0, column=0)
     threshold_current = tk.Text(threshold_entry_window, height=1, width=5)
     threshold_current.insert(tk.END, threshold)
     threshold_current.config(state=DISABLED)
-    threshold_current.pack()
+    threshold_current.grid(row=0, column=1)
     threshold_label = tk.Label(
-        threshold_entry_window, text='Enter a value').pack()
+        threshold_entry_window, text='Enter a value').grid(row=1, column=0, columnspan=2)
     threshold_text_box = tk.Text(threshold_entry_window, height=1, width=10)
-    threshold_text_box.pack()
+    threshold_text_box.grid(row=2, column=0, columnspan=2)
 
     submit_Button = tk.Button(
-        threshold_entry_window, text='Submit', command=lambda: get_threshold()).pack()
+        threshold_entry_window, text='Submit', command=lambda: get_threshold()).grid(row=3, column=0)
     exit_button = tk.Button(threshold_entry_window, text='Exit',
-                            command=threshold_entry_window.destroy).pack()
+                            command=threshold_entry_window.destroy).grid(row=3, column=1)
 
 
 def manual_water():
@@ -312,37 +320,48 @@ def change_sms():
         # get_number obtains the entered phone number in the text box
         global phone_number
         phone_number = phoneno_text_box.get('1.0', tk.END)
+        if len(phone_number) != 12:
+            phoneno_error_window = tk.Toplevel(GUI)
+            phoneno_error_label = tk.Label(
+                phoneno_error_window, text='The entered phone number is not the right length!').grid(row=0, column=0)
+        else:
+            phoneno_current = tk.Text(phoneno_entry_window, height=1, width=15)
+            phoneno_current.insert(tk.END, phone_number)
+            phoneno_current.config(state=DISABLED)
+            phoneno_current.grid(row=0, column=1)
 
     phoneno_entry_window = tk.Toplevel(GUI)
     current_phoneno_label = tk.Label(
-        phoneno_entry_window, text='The current phone number is ').pack()
+        phoneno_entry_window, text='The current phone number is ').grid(row=0, column=0)
     phoneno_current = tk.Text(phoneno_entry_window, height=1, width=15)
     phoneno_current.insert(tk.END, phone_number)
     phoneno_current.config(state=DISABLED)
-    phoneno_current.pack()
+    phoneno_current.grid(row=0, column=1)
     phoneno_label = tk.Label(
-        phoneno_entry_window, text='Enter a Phone Number (e.g.+447123456789)').pack()
+        phoneno_entry_window, text='Enter a Phone Number (e.g.+447123456789)').grid(row=1, column=0, columnspan=2)
     phoneno_text_box = tk.Text(phoneno_entry_window, height=1, width=15)
-    phoneno_text_box.pack()
+    phoneno_text_box.grid(row=2, column=0, columnspan=2)
 
     submit_Button = tk.Button(
-        phoneno_entry_window, text='Submit', command=lambda: get_number()).pack()
+        phoneno_entry_window, text='Submit', command=lambda: get_number()).grid(row=3, column=0)
     exit_button = tk.Button(phoneno_entry_window, text='Exit',
-                            command=phoneno_entry_window.destroy).pack()
+                            command=phoneno_entry_window.destroy).grid(row=3, column=1)
 
 
 auto_water_button = tk.Button(
-    GUI, fg='blue', text='Turn Automatic Watering ON', command=auto_water_boolean).pack()
+    GUI, fg='blue', text='Turn Automatic Watering ON', command=auto_water_boolean).grid(row=1, column=1)
+
 water_threshold_button = tk.Button(
-    GUI, fg='blue', text='Set Soil Moisture Threshold', command=lambda: water_threshold(threshold)).pack()
+    GUI, fg='blue', text='Set Soil Moisture Threshold', command=lambda: water_threshold(threshold)).grid(row=2, column=1)
+
 manual_water_button = tk.Button(
-    GUI, fg='blue', text='Manual Water', command=manual_water).pack()
-moisture_visualisation_button = tk.Button(
-    GUI, fg='blue', text='Show Soil Moisture Level Over Time', command=open_moisture_graph).pack()
+    GUI, fg='blue', text='Manual Water', command=manual_water).grid(row=3, column=1)
+
+
 message_button = tk.Button(
-    GUI, fg='blue', text='Send SMS text', command=lambda: sms_boolean()).pack()
+    GUI, fg='blue', text='Send SMS text', command=lambda: sms_boolean()).grid(row=4, column=0)
 phoneno_button = tk.Button(
-    GUI, fg='blue', text='Change SMS number', command=change_sms).pack()
+    GUI, fg='blue', text='Change SMS number', command=change_sms).grid(row=4, column=1)
 
 background()
 GUI.after(2000, background)
