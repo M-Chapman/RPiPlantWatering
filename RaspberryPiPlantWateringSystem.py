@@ -120,7 +120,7 @@ def load_moisture_graph():
     if len(df['Time']) > 2:
         moistures = df['Moisture']
 
-        fig = Figure(figsize=(6, 4), dpi=100)
+        fig = Figure(figsize=(6.5, 4), dpi=100)
 
         # Formatting of x-axis
         xAxis = []
