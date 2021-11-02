@@ -101,12 +101,12 @@ def background():
             add_moisture(i, counter)
     load_moisture_graph()
 
-    GUI.after(600000, moisture_watch)
+    GUI.after(6000, moisture_watch)
 
     counter += 1
     print('Background has run {} times'.format(counter))
 
-    GUI.after(600000, background)
+    GUI.after(6000, background)
 
 
 def load_moisture_graph():
@@ -403,6 +403,6 @@ water_threshold_button = tk.Button(
     GUI, fg='black', text='Change Soil Moisture Threshold', command=lambda: water_threshold(threshold)).grid(row=7, column=0, columnspan=2, sticky='ew', pady=1, padx=10)
 
 background()
-GUI.after(600000, background)
+# GUI.after(6000, background)
 GUI.mainloop()
 GPIO.cleanup()
