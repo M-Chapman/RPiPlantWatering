@@ -27,7 +27,7 @@ spi.max_speed_hz = 1000000
 # GUI initialisation
 GUI = tk.Tk()
 GUI.title('Raspberry Pi Plant Watering System')
-GUI.geometry("600x600")
+GUI.geometry("700x650")
 frame = tk.Frame(GUI)
 frame.grid()
 
@@ -38,6 +38,7 @@ setup = True
 auto_water_bool = False
 sms_bool = False
 moisture_below = False
+first_water = True
 phone_number = ''
 
 
@@ -157,6 +158,8 @@ def load_moisture_graph():
         canvas = FigureCanvasTkAgg(fig, master=GUI)
 
         canvas.get_tk_widget().grid(row=1, column=0, columnspan=2)
+        last_record_label = tk.Label(GUI, text='Last Recorded: {}'.format(load_csv(
+            "moisturechannel0")[-1][2]), font='Helvetica 12').grid(row=0, column=1, padx=10)
 
 
 def get_moisture(channel):
@@ -203,7 +206,7 @@ def add_moisture(channel, loop_counter):
 def csv_file_write(fields, channel, csvfile, loop_counter):
     # csv_file_write adds the moisture values to the .csv file
     # It adds a header if the program is running for the first time
-    # Accepts an array, integer, file opening operation and integer
+    # Accepts an array of length 3, integer, file opening operation and integer
 
     csvwriter = csv.DictWriter(csvfile, fieldnames=fields)
     if loop_counter == 0:
@@ -268,14 +271,30 @@ def manual_water():
     # Manual water turns the water pump on for 1 second
     # Requires the water pump to be connected to GPIO pin 7 on the Raspberry Pi
 
-    print('WATERING')
-    # pump_pin = 7
+    global first_water
+
+    pump_pin = 7
     # GPIO.setup(pump_pin, GPIO.OUT)
     # GPIO.output(pump_pin, GPIO.LOW)
     # GPIO.output(pump_pin, GPIO.HIGH)
     # GPIO.output(pump_pin, GPIO.LOW)
     # time.sleep(1)
     # GPIO.output(pump_pin, GPIO.HIGH)
+
+    fields = ['Time', 'Pin']
+
+    if first_water:
+        with open("csvfiles/waterpump.csv", 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            # csvwriter = csv.DictWriter("csvfiles/waterpump.csv", fieldnames=fields)
+            csvwriter.writerow(fields)
+            csvwriter.writerow({datetime.datetime.now().replace(microsecond=0), pump_pin})
+            first_water = False
+    else:
+        with open("csvfiles/waterpump.csv", 'a') as csvfile:
+            csvwriter = csv.writer(csvfile)
+
+            csvwriter.writerow({pump_pin, datetime.datetime.now().replace(microsecond=0)})
 
 
 def moisture_watch():
@@ -355,8 +374,8 @@ def change_sms():
                             command=phoneno_entry_window.destroy).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
 
 
-graph_label = tk.Label(GUI, text='ADC Channel 0 Soil Moisture Level Over Time',
-                       font='Helvetica 14 bold').grid(row=0, column=0)
+graph_label = tk.Label(GUI, text='Channel 0 Soil Moisture Level Over Time',
+                       font='Helvetica 14 bold').grid(row=0, column=0, padx=10)
 
 watering_label = tk.Label(GUI, text='Plant Watering Controls', font='Helvetica 14 bold').grid(
     row=2, column=0, sticky='ew', pady=7)
