@@ -152,7 +152,7 @@ def load_moisture_graph():
         a.set_xlabel('Time of Reading')
         a.set_ylabel('Soil Moisture %')
         a.set_title('Soil Moisture Level over Time')
-        a.set_ylim([0,80])
+        a.set_ylim([5,60])
         fig.subplots_adjust(bottom=0.23)
 
         canvas = FigureCanvasTkAgg(fig, master=GUI)
@@ -403,6 +403,5 @@ water_threshold_button = tk.Button(
     GUI, fg='black', text='Change Soil Moisture Threshold', command=lambda: water_threshold(threshold)).grid(row=7, column=0, columnspan=2, sticky='ew', pady=1, padx=10)
 
 background()
-# GUI.after(6000, background)
 GUI.mainloop()
 GPIO.cleanup()
