@@ -274,27 +274,27 @@ def manual_water():
     global first_water
 
     pump_pin = 7
-    # GPIO.setup(pump_pin, GPIO.OUT)
-    # GPIO.output(pump_pin, GPIO.LOW)
-    # GPIO.output(pump_pin, GPIO.HIGH)
-    # GPIO.output(pump_pin, GPIO.LOW)
-    # time.sleep(1)
-    # GPIO.output(pump_pin, GPIO.HIGH)
+    GPIO.setup(pump_pin, GPIO.OUT)
+    GPIO.output(pump_pin, GPIO.LOW)
+    GPIO.output(pump_pin, GPIO.HIGH)
+    GPIO.output(pump_pin, GPIO.LOW)
+    time.sleep(1)
+    GPIO.output(pump_pin, GPIO.HIGH)
 
     fields = ['Time', 'Pin']
 
     if first_water:
         with open("csvfiles/waterpump.csv", 'w', newline='') as csvfile:
             csvwriter = csv.writer(csvfile)
-            # csvwriter = csv.DictWriter("csvfiles/waterpump.csv", fieldnames=fields)
             csvwriter.writerow(fields)
-            csvwriter.writerow({datetime.datetime.now().replace(microsecond=0), pump_pin})
+            csvwriter.writerow(
+                {datetime.datetime.now().replace(microsecond=0), pump_pin})
             first_water = False
     else:
         with open("csvfiles/waterpump.csv", 'a') as csvfile:
             csvwriter = csv.writer(csvfile)
-
-            csvwriter.writerow({pump_pin, datetime.datetime.now().replace(microsecond=0)})
+            csvwriter.writerow(
+                {pump_pin, datetime.datetime.now().replace(microsecond=0)})
 
 
 def moisture_watch():
