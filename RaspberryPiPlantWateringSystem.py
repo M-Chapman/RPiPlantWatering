@@ -50,10 +50,10 @@ def auto_water_boolean():
     auto_water_bool = not auto_water_bool
     if auto_water_bool:
         auto_water_button = tk.Button(
-            GUI, fg='green', text='Turn Automatic Watering OFF', command=auto_water_boolean).grid(row=3, column=0, sticky='ew', pady=1, padx=10)
+            GUI, fg='green', text='Turn Automatic Watering OFF', command=auto_water_boolean).grid(row=4, column=0, sticky='ew', pady=1, padx=10)
     else:
         auto_water_button = tk.Button(
-            GUI, fg='red', text='Turn Automatic Watering ON ', command=auto_water_boolean).grid(row=3, column=0, sticky='ew', pady=1, padx=10)
+            GUI, fg='red', text='Turn Automatic Watering ON ', command=auto_water_boolean).grid(row=4, column=0, sticky='ew', pady=1, padx=10)
 
 
 def sms_boolean():
@@ -64,10 +64,10 @@ def sms_boolean():
     sms_bool = not sms_bool
     if sms_bool:
         message_button = tk.Button(
-            GUI, fg='green', text='Turn SMS texting OFF', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
+            GUI, fg='green', text='Turn SMS texting OFF', command=lambda: sms_boolean()).grid(row=4, column=1, sticky='ew', pady=1, padx=10)
     else:
         message_button = tk.Button(
-            GUI, fg='red', text='Turn SMS texting ON ', command=lambda: sms_boolean()).grid(row=3, column=1, sticky='ew', pady=1, padx=10)
+            GUI, fg='red', text='Turn SMS texting ON ', command=lambda: sms_boolean()).grid(row=4, column=1, sticky='ew', pady=1, padx=10)
 
 
 def background():
@@ -93,7 +93,6 @@ def background():
 
         setup = False
 
-        # GUI.after(2000, background)
     else:
         # Runs after first time
         # Undefined can be ignored as this is inaccessible before declaration of variables
@@ -102,12 +101,12 @@ def background():
             add_moisture(i, counter)
     load_moisture_graph()
 
-    GUI.after(5000, moisture_watch)
+    GUI.after(600000, moisture_watch)
 
     counter += 1
     print('Background has run {} times'.format(counter))
 
-    GUI.after(5000, background)
+    GUI.after(600000, background)
 
 
 def load_moisture_graph():
@@ -153,6 +152,7 @@ def load_moisture_graph():
         a.set_xlabel('Time of Reading')
         a.set_ylabel('Soil Moisture %')
         a.set_title('Soil Moisture Level over Time')
+        a.set_ylim([0,80])
         fig.subplots_adjust(bottom=0.23)
 
         canvas = FigureCanvasTkAgg(fig, master=GUI)
@@ -213,7 +213,7 @@ def csv_file_write(fields, channel, csvfile, loop_counter):
         # Runs upon file creation only
         csvwriter.writeheader()
     csvwriter.writerow({'channel': channel, 'Time': datetime.datetime.now(
-    ).replace(microsecond=0), 'Moisture': get_moisture(channel)})
+    ).replace(microsecond=0), 'Moisture': 1000/get_moisture(channel)})
 
 
 def load_csv(filename):
@@ -403,6 +403,6 @@ water_threshold_button = tk.Button(
     GUI, fg='black', text='Change Soil Moisture Threshold', command=lambda: water_threshold(threshold)).grid(row=7, column=0, columnspan=2, sticky='ew', pady=1, padx=10)
 
 background()
-GUI.after(2000, background)
+GUI.after(600000, background)
 GUI.mainloop()
 GPIO.cleanup()
